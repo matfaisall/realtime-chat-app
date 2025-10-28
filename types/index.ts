@@ -1,8 +1,8 @@
 export interface User {
   id: string;
-  fullname: string;
+  name: string;
   email: string;
   photoURL?: string;
-  status?: "online" | "ofline";
+  status?: "online" | "offline";
   lastSeen?: number;
 }

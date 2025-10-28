@@ -5,7 +5,7 @@ import React from "react";
 import { LogOut } from "lucide-react";
 
 import ChatSidebar from "@/components/shared/ChatSidebar";
-import { User } from "@/types/chat";
+import { User } from "@/types";
 
 const Chat = () => {
   const [users, setUsers] = React.useState<User[]>([]);

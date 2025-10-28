@@ -1,4 +1,4 @@
-import { User } from "@/types/chat";
+import { User } from "@/types";
 import React from "react";
 
 interface UsersListProps {

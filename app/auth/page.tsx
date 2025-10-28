@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 import { Loader2, MessageCircle } from "lucide-react";
@@ -14,30 +16,86 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+import { authService } from "@/services/auth.service";
+
 const AuthPage = () => {
+  const router = useRouter();
   const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(false);
+  const [error, setError] = React.useState("");
   const [inputLogin, setInputLogin] = React.useState({
     email: "",
     password: "",
   });
 
   const [inputRegister, setInputRegister] = React.useState({
-    fullname: "",
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
 
   // handler
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("login", inputLogin);
+    // console.log(...Object.values(inputLogin));
+    setError("");
+    setLoading(true);
+    const { email, password } = inputLogin;
+    try {
+      // console.log(email);
+      await authService.login(email, password);
+      router.push("/chat");
+    } catch (error: any) {
+      setError(error.message || "Login failed, Check your email and password");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("register", inputRegister);
+
+    const { name, email, password, confirmPassword } = inputRegister;
+
+    if (!name || !email || !password) {
+      setError("All input must be filled in");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be as least 6 characters");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Password and Confirm Password must be the same");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await authService.register(name, email, password);
+      router.push("auth");
+    } catch (error: any) {
+      if (error.message.includes("email-already-in-use")) {
+        setError("Email already in use");
+      } else if (error.message.includes("invalid-email")) {
+        setError("Invalid email address");
+      } else {
+        setError(error.message || "Something went wrong, try again later");
+      }
+    } finally {
+      // reset input
+      setInputRegister({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+      setLoading(false);
+    }
   };
 
   return (
@@ -141,16 +199,16 @@ const AuthPage = () => {
               <CardContent>
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="fullname-register">Fullname</Label>
+                    <Label htmlFor="name-register">Name</Label>
                     <Input
-                      id="fullname-register"
+                      id="name-register"
                       type="text"
-                      placeholder="Fullname"
-                      value={inputRegister.fullname}
+                      placeholder="Name"
+                      value={inputRegister.name}
                       onChange={(e) =>
                         setInputRegister({
                           ...inputRegister,
-                          fullname: e.target.value,
+                          name: e.target.value,
                         })
                       }
                       required
