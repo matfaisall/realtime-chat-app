@@ -3,6 +3,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 
@@ -79,5 +80,21 @@ export const authService = {
     } catch (error: any) {
       throw new Error(error.message);
     }
+  },
+
+  // listen to auth state change
+  onAuthStateChange(callback: (user: User | null) => void) {
+    return onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+        if (userDoc.exists()) {
+          callback(userDoc.data() as User);
+        } else {
+          callback(null);
+        }
+      } else {
+        callback(null);
+      }
+    });
   },
 };

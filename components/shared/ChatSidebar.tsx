@@ -12,11 +12,11 @@ interface ChatSidebarProps {
   users: User[];
 }
 
-const ChatSidebar = ({ users }: ChatSidebarProps) => {
+export function ChatSidebar({ users }: ChatSidebarProps) {
   const [showUsersList, setShowUsersList] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
 
-  console.log(showUsersList);
+  console.log("ini users", users);
 
   const handleStartChat = () => {};
 
@@ -66,6 +66,6 @@ const ChatSidebar = ({ users }: ChatSidebarProps) => {
       </ScrollArea>
     </div>
   );
-};
+}
 
 export default ChatSidebar;
