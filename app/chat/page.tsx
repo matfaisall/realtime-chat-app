@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import React, { Suspense } from "react";
 import { LogOut, Loader2 } from "lucide-react";
 import { authService } from "@/services/auth.service";
+import { useAppDispatch } from "@/store/hooks";
 
 import { User } from "@/types";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { setCurrentUser } from "@/store/slices/chatSlice";
 
 interface ChatTopBarProps {
   currentUser: User;
@@ -72,10 +74,17 @@ function ChatTopBar({ currentUser, onLogout }: ChatTopBarProps) {
 }
 
 const ChatPage = () => {
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const [users, setUsers] = React.useState<User[]>([]);
 
   const { user: authUser, loading: authLoading } = useAuth(true);
+
+  // update redux store with current user
+  React.useEffect(() => {
+    console.log("ini auth user", authUser);
+    if (authUser) dispatch(setCurrentUser(authUser));
+  }, [authUser, dispatch]);
 
   // subscribe to users
   React.useEffect(() => {
@@ -108,6 +117,8 @@ const ChatPage = () => {
   const handleSendMessage = () => {};
 
   if (!authUser) return null;
+
+  console.log("ini users", users);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
