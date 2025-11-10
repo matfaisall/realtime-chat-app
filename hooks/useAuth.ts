@@ -11,7 +11,6 @@ export const useAuth = (requiredAuth: boolean = false) => {
 
   React.useEffect(() => {
     const unsubscribe = authService.onAuthStateChange(async (authUser) => {
-      console.log("useAuth", authUser);
       setUser(authUser);
       setLoading(false);
 

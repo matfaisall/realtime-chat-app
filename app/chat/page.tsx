@@ -3,12 +3,14 @@
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import React, { Suspense } from "react";
-import { LogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 import { authService } from "@/services/auth.service";
 
 import { User } from "@/types";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface ChatTopBarProps {
   currentUser: User;
@@ -28,9 +30,23 @@ const ChatSidebar = dynamic(
   }
 );
 
+const ChatWindow = dynamic(
+  () =>
+    import("@/components/shared/ChatWindow").then((mod) => ({
+      default: mod.ChatWindow,
+    })),
+  {
+    loading: () => (
+      <div className="flex-1 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
 // top bar compnents
 function ChatTopBar({ currentUser, onLogout }: ChatTopBarProps) {
-  console.log("ini current user", currentUser);
   return (
     <div className="bg-green-500 text-white p-3 flex items-center justify-between shadow-md">
       <div className="flex items-center gap-3">
@@ -61,17 +77,35 @@ const ChatPage = () => {
 
   const { user: authUser, loading: authLoading } = useAuth(true);
 
-  console.log(authUser);
+  // subscribe to users
+  React.useEffect(() => {
+    if (!authUser) return;
+
+    const userRef = collection(db, "users");
+    const q = query(userRef, where("id", "!=", authUser.id));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const allUsers: User[] = [];
+      snapshot.forEach((doc) => {
+        allUsers.push(doc.data() as User);
+      });
+
+      setUsers(allUsers);
+    });
+
+    return () => unsubscribe();
+  }, [authUser]);
 
   const handleLogout = React.useCallback(async () => {
     try {
       await authService.logout();
       router.push("/auth");
     } catch (error: any) {
-      console.log("Error logging out", error);
       throw new Error(error.message);
     }
   }, [router]);
+
+  const handleSendMessage = () => {};
 
   if (!authUser) return null;
 
@@ -84,6 +118,16 @@ const ChatPage = () => {
           fallback={<div className="w-96 bg-background animate-pulse" />}
         >
           <ChatSidebar users={users} />
+        </Suspense>
+        {/* main window */}
+        <Suspense
+          fallback={
+            <div className="flex flex-1 justify-center items-center">
+              <Loader2 className="size-8 animate-spin text-primary" />
+            </div>
+          }
+        >
+          <ChatWindow users={users} onSendMessage={handleSendMessage} />
         </Suspense>
       </div>
     </div>

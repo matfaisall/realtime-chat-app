@@ -37,12 +37,10 @@ const AuthPage = () => {
   // handler
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // console.log(...Object.values(inputLogin));
     setError("");
     setLoading(true);
     const { email, password } = inputLogin;
     try {
-      // console.log(email);
       await authService.login(email, password);
       router.push("/chat");
     } catch (error: any) {
@@ -54,7 +52,6 @@ const AuthPage = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("register", inputRegister);
 
     const { name, email, password, confirmPassword } = inputRegister;
 

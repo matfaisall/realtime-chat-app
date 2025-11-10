@@ -16,8 +16,6 @@ export function ChatSidebar({ users }: ChatSidebarProps) {
   const [showUsersList, setShowUsersList] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
 
-  console.log("ini users", users);
-
   const handleStartChat = () => {};
 
   return (
