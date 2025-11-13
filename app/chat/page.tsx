@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import React, { Suspense } from "react";
 import { LogOut, Loader2 } from "lucide-react";
 import { authService } from "@/services/auth.service";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 import { User } from "@/types";
 import { useRouter } from "next/navigation";
@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { setCurrentUser } from "@/store/slices/chatSlice";
+import { chatService } from "@/services/chat.service";
 
 interface ChatTopBarProps {
   currentUser: User;
@@ -77,6 +78,7 @@ const ChatPage = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [users, setUsers] = React.useState<User[]>([]);
+  const { activeChat } = useAppSelector((state) => state.chat);
 
   const { user: authUser, loading: authLoading } = useAuth(true);
 
@@ -114,7 +116,25 @@ const ChatPage = () => {
     }
   }, [router]);
 
-  const handleSendMessage = () => {};
+  const handleSendMessage = React.useCallback(
+    async (text: string, imageFile?: File) => {
+      if (!activeChat && !authUser) return;
+
+      try {
+        await chatService.sandMessage(
+          activeChat || "",
+          authUser?.id || "",
+          text,
+          imageFile
+        );
+      } catch (error) {
+        console.log("error", error);
+      }
+    },
+    [activeChat, authUser]
+  );
+
+  //! tambahkan loading loading disini nantinya
 
   if (!authUser) return null;
 

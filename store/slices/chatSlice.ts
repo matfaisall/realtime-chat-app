@@ -32,9 +32,41 @@ const chatSlice = createSlice({
     setActiveChat: (state, action: PayloadAction<string | null>) => {
       state.activeChat = action.payload;
     },
+
+    // masih bleum di pakai
+    updateChat: (state, action: PayloadAction<Chat>) => {
+      const index = state.chats.findIndex(
+        (chat) => chat.id === action.payload.id
+      );
+      if (index !== -1) {
+        state.chats[index] = action.payload;
+      }
+    },
+
+    // masih belum di pakai
+    addMessage: (state, action: PayloadAction<Message>) => {
+      const chatId = action.payload.chatId;
+      if (!state.messages[chatId]) {
+        state.messages[chatId] = [];
+      }
+      const exists = state.messages[chatId].find(
+        (msg) => msg.id === action.payload.id
+      );
+      if (!exists) {
+        state.messages[chatId].push(action.payload);
+      }
+    },
+
+    setMessages: (
+      state,
+      action: PayloadAction<{ chatId: string; messages: Message[] }>
+    ) => {
+      state.messages[action.payload.chatId] = action.payload.messages;
+    },
   },
 });
 
-export const { setCurrentUser, setChat, setActiveChat } = chatSlice.actions;
+export const { setCurrentUser, setChat, setActiveChat, setMessages } =
+  chatSlice.actions;
 
 export default chatSlice.reducer;

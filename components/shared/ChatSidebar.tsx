@@ -13,7 +13,6 @@ import { chatService } from "@/services/chat.service";
 import { setActiveChat } from "@/store/slices/chatSlice";
 import { format } from "date-fns";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-// import { Message, Chat } from "@/types";
 
 interface ChatSidebarProps {
   users: User[];
@@ -75,10 +74,6 @@ export function ChatSidebar({ users }: ChatSidebarProps) {
   const [showUsersList, setShowUsersList] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
 
-  console.log("active chat", activeChat);
-  // console.log("chat", chats);
-  // console.log("search", searchQuery);
-
   const getChatUser = React.useCallback(
     (userId: string) => {
       const chat = chats.find((chat) => chat.id === userId);
@@ -107,8 +102,6 @@ export function ChatSidebar({ users }: ChatSidebarProps) {
     });
   }, [getChatUser, chats, searchQuery]);
 
-  console.log("ini filter", filteredChat);
-
   const handleChatClick = React.useCallback(
     (chatId: string) => {
       dispatch(setActiveChat(chatId));
@@ -126,6 +119,8 @@ export function ChatSidebar({ users }: ChatSidebarProps) {
           user.id
         );
 
+        console.log("ini chat id", chatId);
+
         dispatch(setActiveChat(chatId));
         setShowUsersList(false);
       } catch (error: any) {
@@ -141,7 +136,7 @@ export function ChatSidebar({ users }: ChatSidebarProps) {
       {/* header */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between mb-4">
-          <h1>Chats</h1>
+          <h1 className="text-xl font-semibold">Chats</h1>
           <Button
             variant="ghost"
             size="icon"
@@ -180,7 +175,6 @@ export function ChatSidebar({ users }: ChatSidebarProps) {
               </div>
             ) : (
               filteredChat.map((chat) => {
-                console.log("ini chat", chat);
                 return (
                   <ChatItem
                     key={chat.id}
